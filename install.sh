@@ -23,13 +23,35 @@ link() {
   info "linked $dest -> $src"
 }
 
+find_brew() {
+  command -v brew && return
+  for b in /opt/homebrew/bin/brew /usr/local/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
+    [ -x "$b" ] && echo "$b" && return
+  done
+  return 1
+}
+
 # 1. Homebrew + packages
-if ! command -v brew >/dev/null 2>&1; then
+BREW="$(find_brew || true)"
+if [ -z "$BREW" ]; then
   info "installing Homebrew"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  for b in /opt/homebrew/bin/brew /usr/local/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
-    [ -x "$b" ] && eval "$("$b" shellenv)" && break
-  done
+  BREW="$(find_brew)"
+fi
+if ! command -v brew >/dev/null 2>&1; then
+  # brew isn't on PATH yet: use it now, and put it on PATH for future shells
+  eval "$("$BREW" shellenv)"
+  case "$(basename "${SHELL:-}")" in
+    zsh) rc="$HOME/.zprofile" ;;
+    bash) [ "$(uname)" = Darwin ] && rc="$HOME/.bash_profile" || rc="$HOME/.bashrc" ;;
+    *) rc="" ;;
+  esac
+  if [ -n "$rc" ] && ! grep -qs "$BREW shellenv" "$rc"; then
+    printf '\neval "$(%s shellenv)"\n' "$BREW" >> "$rc"
+    info "added Homebrew to PATH in $rc"
+  elif [ -z "$rc" ]; then
+    echo "note: add 'eval \"\$($BREW shellenv)\"' to your shell's startup file"
+  fi
 fi
 info "installing packages from Brewfile"
 brew bundle --file="$DOTFILES/Brewfile"
