@@ -1,11 +1,30 @@
 #!/usr/bin/env bash
 # Set up this machine like the others (macOS, Linux, WSL; x86 or ARM).
-#   - system basics (git, curl, unzip, C compiler) via the OS package manager, only if sudo is available
+#   - system basics (git, curl, unzip, C compiler) via the OS package manager, only if sudo works
 #   - everything else per user via mise, no sudo: nvim, lazygit, delta, ripgrep, fd, fzf, tree-sitter, node, pnpm
 #   - configs symlinked from this repo; anything already in the way is moved to <name>.bak.<timestamp>
 #   - Nerd Font on machines with a screen (skipped over SSH and on WSL)
 # Safe to re-run.
+#
+# Usage: install.sh [--no-sudo]
+#   --no-sudo   never touch system packages (e.g. on a shared box); zig and 7-Zip stand in for
+#               a missing C compiler and unzip. Same as DOTFILES_NO_SUDO=1.
 set -euo pipefail
+
+# pinned versions (the tools themselves are pinned in mise/config.toml)
+MISE_VERSION="v2026.10.17"
+ZIG_VERSION="0.17.0"
+SEVENZIP_VERSION="26.05"
+NERD_FONTS_VERSION="v3.5.1"
+
+NO_SUDO="${DOTFILES_NO_SUDO:-0}"
+for arg in "$@"; do
+  case "$arg" in
+    --no-sudo) NO_SUDO=1 ;;
+    -h | --help) sed -n '2,/^set -euo/p' "$0" | sed '$d; s/^# \{0,1\}//'; exit 0 ;;
+    *) echo "unknown option: $arg (try --help)"; exit 1 ;;
+  esac
+done
 
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STAMP="$(date +%Y%m%d%H%M%S)"
@@ -33,8 +52,9 @@ link() {
 
 is_wsl() { [ "$OS" = Linux ] && grep -qi microsoft /proc/version 2>/dev/null; }
 
-# root, passwordless sudo, or a sudo password typed now
+# root, passwordless sudo, or a sudo password typed now (never with --no-sudo)
 can_sudo() {
+  [ "$NO_SUDO" = 1 ] && return 1
   [ "$(id -u)" = 0 ] && return 0
   has sudo || return 1
   sudo -n true 2>/dev/null && return 0
@@ -73,7 +93,7 @@ else
         note "unknown package manager; install these yourself: ${missing[*]}"
       fi
     else
-      note "no sudo, so these system tools weren't installed: ${missing[*]} (zig and 7-Zip stand in for cc and unzip)"
+      note "system packages not installed (no sudo): ${missing[*]} (zig and 7-Zip stand in for cc and unzip)"
       has curl && has tar || { echo "curl and tar are required to continue"; exit 1; }
     fi
   fi
@@ -86,7 +106,7 @@ elif [ -x "$HOME/.local/bin/mise" ]; then
   MISE="$HOME/.local/bin/mise"
 else
   info "installing mise"
-  curl -fsSL https://mise.run | sh
+  curl -fsSL https://mise.run | MISE_VERSION="$MISE_VERSION" sh
   MISE="$HOME/.local/bin/mise"
 fi
 
@@ -100,7 +120,7 @@ export PATH="$HOME/.local/bin:$PATH"
 # no C compiler and no sudo to get one: use zig's, so treesitter parsers can still be built
 if ! has cc; then
   info "no C compiler; installing zig to provide cc"
-  "$MISE" install zig@latest
+  "$MISE" install "zig@$ZIG_VERSION"
   mkdir -p "$HOME/.local/bin"
   # tree-sitter passes Rust-style targets (aarch64-unknown-linux-gnu) that zig can't parse;
   # dropping them is fine since zig builds for this machine by default
@@ -116,7 +136,7 @@ for a; do
   esac
   set -- "\$@" "\$a"
 done
-exec "$("$MISE" where zig@latest)/zig" cc "\$@"
+exec "$("$MISE" where "zig@$ZIG_VERSION")/zig" cc "\$@"
 EOF
   chmod +x "$HOME/.local/bin/cc"
 fi
@@ -124,7 +144,7 @@ fi
 # no unzip and no sudo to get one: Mason only runs `unzip -d DIR FILE`, so 7-Zip can stand in
 if ! has unzip; then
   info "no unzip; installing 7-Zip to provide it"
-  "$MISE" install 7zip@latest
+  "$MISE" install "7zip@$SEVENZIP_VERSION"
   mkdir -p "$HOME/.local/bin"
   cat > "$HOME/.local/bin/unzip" <<EOF
 #!/bin/sh
@@ -136,7 +156,7 @@ while [ \$# -gt 1 ]; do
     *) break ;;
   esac
 done
-exec "$("$MISE" where 7zip@latest)/7zz" x -y -bso0 -bsp0 "-o\$dir" "\$@"
+exec "$("$MISE" where "7zip@$SEVENZIP_VERSION")/7zz" x -y -bso0 -bsp0 "-o\$dir" "\$@"
 EOF
   chmod +x "$HOME/.local/bin/unzip"
 fi
@@ -177,7 +197,7 @@ install_font() {
   fi
   info "installing JetBrains Mono NL Nerd Font"
   tmp="$(mktemp -d)"
-  curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz | tar -xJ -C "$tmp"
+  curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/download/$NERD_FONTS_VERSION/JetBrainsMono.tar.xz | tar -xJ -C "$tmp"
   mkdir -p "$dir"
   cp "$tmp"/$FONT_GLOB "$dir/"
   rm -rf "$tmp"

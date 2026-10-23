@@ -1,11 +1,13 @@
-# Tools for this setup, installed per user by mise (no sudo). `mise up` updates them.
+# Tools for this setup, installed per user by mise (no sudo). Versions are pinned so every
+# machine gets the same ones; `mise outdated` lists newer releases and `mise up --bump`
+# installs them and rewrites this file (it's symlinked from the repo, so commit the change).
 [tools]
-"aqua:neovim/neovim" = "latest"
-lazygit = "latest"
-delta = "latest"
-ripgrep = "latest"
-fd = "latest"
-fzf = "latest"
-tree-sitter = "latest"
-node = "lts"
-pnpm = "latest"
+"aqua:neovim/neovim" = "0.12.6"
+lazygit = "0.66.2"
+delta = "0.20.1"
+ripgrep = "15.2.0"
+fd = "10.5.0"
+fzf = "0.74.5"
+tree-sitter = "0.27.1"
+node = "24.22.1"
+pnpm = "12.15.0"

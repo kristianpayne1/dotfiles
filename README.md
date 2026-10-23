@@ -12,6 +12,9 @@ git clone https://github.com/kristianpayne1/dotfiles.git ~/dotfiles
 
 Then open a new terminal. Re-running the script is safe.
 
+On a shared box, use `~/dotfiles/install.sh --no-sudo`: it never installs system packages, even
+when sudo works, and stands in zig and 7-Zip for a missing C compiler and unzip.
+
 Only `git` is needed to start. On a new Mac, running `git` offers to install the Xcode command
 line tools, which include it.
 
@@ -23,8 +26,8 @@ line tools, which include it.
    (both installed per user by mise). On macOS it checks for the Xcode command line tools.
 2. **Tools, per user, no sudo.** It installs [mise](https://mise.jdx.dev) into `~/.local/bin`,
    which installs everything in `mise/config.toml`: Neovim, lazygit, delta, ripgrep, fd, fzf,
-   tree-sitter, Node LTS (with npm) and pnpm. It also adds mise to `~/.zshrc` or `~/.bashrc`.
-   `mise up` updates them later.
+   tree-sitter, Node LTS (with npm) and pnpm, at the pinned versions. It also adds mise to
+   `~/.zshrc` or `~/.bashrc`.
 3. **Configs.** Symlinks them into place, moving anything already there to `<name>.bak.<time>`.
 4. **Font and terminal.** On macOS it installs JetBrains Mono NL Nerd Font, and Ghostty too if
    Homebrew is present. On desktop Linux it installs the font into `~/.local/share/fonts`. Over
@@ -32,6 +35,19 @@ line tools, which include it.
    on Windows.
 5. **Neovim.** Installs the plugins at the versions in `nvim/lazy-lock.json` and waits for Mason
    to install the language servers and formatters.
+
+## Versions and updating
+
+Everything is pinned so every machine gets the same setup: the tools in `mise/config.toml`,
+the plugins in `nvim/lazy-lock.json`, and mise, zig, 7-Zip and the Nerd Font at the top of
+`install.sh`. To update:
+
+- **Tools:** `mise outdated` shows what's newer; `mise up --bump` installs it and rewrites
+  `mise/config.toml`.
+- **Plugins:** `:Lazy update` in Neovim rewrites `lazy-lock.json`.
+
+Then commit and push from `~/dotfiles`, and run `install.sh` (or `mise install`) on the other
+machines.
 
 ## What's here
 
