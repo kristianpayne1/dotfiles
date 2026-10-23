@@ -1,0 +1,39 @@
+[core]
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[merge]
+	conflictStyle = zdiff3
+
+[delta]
+	features = onedark-pro
+	navigate = true
+	line-numbers = true
+
+# One Dark Pro palette: bg #282c34, fg #abb2bf, red #e06c75, green #98c379,
+# yellow #e5c07b, blue #61afef, purple #c678dd, cyan #56b6c2, comment #5c6370
+[delta "onedark-pro"]
+	dark = true
+	syntax-theme = TwoDark
+	minus-style = syntax "#3c2a30"
+	minus-emph-style = syntax "#6b3239"
+	minus-non-emph-style = syntax "#3c2a30"
+	plus-style = syntax "#2b3a2c"
+	plus-emph-style = syntax "#3f5c34"
+	plus-non-emph-style = syntax "#2b3a2c"
+	line-numbers-minus-style = "#e06c75"
+	line-numbers-plus-style = "#98c379"
+	line-numbers-zero-style = "#5c6370"
+	line-numbers-left-style = "#3e4451"
+	line-numbers-right-style = "#3e4451"
+	file-style = "#61afef" bold
+	file-decoration-style = "#61afef" ul
+	hunk-header-style = omit
+	commit-decoration-style = "#e5c07b" box
+	blame-palette = "#282c34" "#2c313a" "#21252b"
+	merge-conflict-begin-symbol = ▼
+	merge-conflict-end-symbol = ▲
+	merge-conflict-ours-diff-header-style = "#e5c07b" bold
+	merge-conflict-theirs-diff-header-style = "#56b6c2" bold

@@ -1,0 +1,39 @@
+# One Dark Pro palette: bg #282c34, fg #abb2bf, red #e06c75, green #98c379,
+# yellow #e5c07b, blue #61afef, purple #c678dd, cyan #56b6c2, comment #5c6370
+gui:
+  nerdFontsVersion: "3"
+  theme:
+    activeBorderColor:
+      - "#61afef"
+      - bold
+    inactiveBorderColor:
+      - "#5c6370"
+    searchingActiveBorderColor:
+      - "#e5c07b"
+      - bold
+    optionsTextColor:
+      - "#61afef"
+    selectedLineBgColor:
+      - "#3e4451"
+    inactiveViewSelectedLineBgColor:
+      - "#2c313a"
+    cherryPickedCommitFgColor:
+      - "#282c34"
+    cherryPickedCommitBgColor:
+      - "#56b6c2"
+    markedBaseCommitFgColor:
+      - "#282c34"
+    markedBaseCommitBgColor:
+      - "#e5c07b"
+    unstagedChangesColor:
+      - "#e06c75"
+    defaultFgColor:
+      - "#abb2bf"
+
+git:
+  # `|` cycles between these: side-by-side first, unified second
+  pagers:
+    - colorArg: always
+      pager: delta --dark --paging=never --side-by-side --width=$(( ({{columnWidth}} + 6) * 2 ))
+    - colorArg: always
+      pager: delta --dark --paging=never
