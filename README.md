@@ -19,8 +19,8 @@ line tools, which include it.
 
 1. **System basics.** On Linux it installs a C compiler, make, curl, unzip and xz with the
    system package manager (apt, dnf, yum, pacman, zypper or apk), but only when something is
-   missing and sudo works. Without sudo it lists what's missing and carries on. On macOS it
-   checks for the Xcode command line tools.
+   missing and sudo works. Without sudo it uses zig as the C compiler and 7-Zip for unzip
+   (both installed per user by mise). On macOS it checks for the Xcode command line tools.
 2. **Tools, per user, no sudo.** It installs [mise](https://mise.jdx.dev) into `~/.local/bin`,
    which installs everything in `mise/config.toml`: Neovim, lazygit, delta, ripgrep, fd, fzf,
    tree-sitter, Node LTS (with npm) and pnpm. It also adds mise to `~/.zshrc` or `~/.bashrc`.
