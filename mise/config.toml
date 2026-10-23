@@ -1,0 +1,11 @@
+# Tools for this setup, installed per user by mise (no sudo). `mise up` updates them.
+[tools]
+"aqua:neovim/neovim" = "latest"
+lazygit = "latest"
+delta = "latest"
+ripgrep = "latest"
+fd = "latest"
+fzf = "latest"
+tree-sitter = "latest"
+node = "lts"
+pnpm = "latest"
