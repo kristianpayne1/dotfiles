@@ -48,6 +48,6 @@ docker run --rm -e GITHUB_TOKEN -v "$DOTFILES:/src:ro" "$tag" bash -c "
   echo '  ok  re-run made no changes'
   echo '--- install leaves the repo untouched'
   dirty=\$(git -C ~/dotfiles status --porcelain)
-  if [ -n \"\$dirty\" ]; then echo \"FAIL: repo changed:\"; echo \"\$dirty\"; exit 1; fi
+  if [ -n \"\$dirty\" ]; then echo \"FAIL: repo changed:\"; echo \"\$dirty\"; git -C ~/dotfiles diff; exit 1; fi
   echo '  ok  no changes in the repo'
 "
