@@ -25,6 +25,15 @@ latest_tag() {
 MISE_VERSION="${1:-$(latest_tag jdx/mise)}"
 NERD_FONTS_VERSION="${2:-$(latest_tag ryanoasis/nerd-fonts)}"
 
+# never go backwards: waiting for releases to age can pick one older than what's pinned
+older() { [ "$1" != "$2" ] && [ "$(printf '%s\n%s\n' "${1#v}" "${2#v}" | sort -V | head -1)" = "${1#v}" ]; }
+if [ -f pins.sh ] && [ $# -eq 0 ]; then
+  current_mise="$(sed -n 's/^MISE_VERSION="\(.*\)"$/\1/p' pins.sh)"
+  current_fonts="$(sed -n 's/^NERD_FONTS_VERSION="\(.*\)"$/\1/p' pins.sh)"
+  older "$MISE_VERSION" "$current_mise" && MISE_VERSION="$current_mise"
+  older "$NERD_FONTS_VERSION" "$current_fonts" && NERD_FONTS_VERSION="$current_fonts"
+fi
+
 mise_sums="$(curl -fsSL "https://github.com/jdx/mise/releases/download/$MISE_VERSION/SHASUMS256.txt")"
 mise_sum() { awk -v f="./mise-$MISE_VERSION-$1.tar.gz" '$2 == f { print $1 }' <<<"$mise_sums"; }
 font_sum="$(curl -fsSL "https://github.com/ryanoasis/nerd-fonts/releases/download/$NERD_FONTS_VERSION/SHA-256.txt" |
