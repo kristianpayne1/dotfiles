@@ -1,0 +1,9 @@
+# Stand-ins install.sh uses only when a box has no C compiler or unzip and no sudo to get them:
+# zig as cc (for treesitter parsers) and 7-Zip as unzip. Locked like the main tools.
+[settings]
+locked = true
+disable_backends = ["asdf", "vfox"]
+
+[tools]
+zig = "0.17.0"
+7zip = "26.05"

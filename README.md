@@ -1,7 +1,8 @@
 # dotfiles
 
 Neovim (LazyVim), lazygit and git/delta in One Dark Pro, set up the same way on macOS, Linux
-(any distro, x86 or ARM) and WSL, including boxes where you don't have sudo.
+(any distro, x86 or ARM) and WSL, including boxes where you don't have sudo. Every download is
+pinned to an exact version and checked against a recorded checksum.
 
 ## Install
 
@@ -12,51 +13,82 @@ git clone https://github.com/kristianpayne1/dotfiles.git ~/dotfiles
 
 Then open a new terminal. Re-running the script is safe.
 
-On a shared box, use `~/dotfiles/install.sh --no-sudo`: it never installs system packages, even
-when sudo works, and stands in zig and 7-Zip for a missing C compiler and unzip.
-
 Only `git` is needed to start. On a new Mac, running `git` offers to install the Xcode command
 line tools, which include it.
+
+Options:
+
+- `--no-sudo`: for shared boxes. Never installs system packages, even when sudo works; zig and
+  7-Zip stand in for a missing C compiler and unzip.
+- `--ca-cert FILE`: for networks whose proxy inspects HTTPS. Trusts that extra CA certificate
+  for this run and future shells. Behind a plain proxy, just have `HTTPS_PROXY` set.
 
 ## What the script does
 
 1. **System basics.** On Linux it installs a C compiler, make, curl, unzip and xz with the
    system package manager (apt, dnf, yum, pacman, zypper or apk), but only when something is
-   missing and sudo works. Without sudo it uses zig as the C compiler and 7-Zip for unzip
-   (both installed per user by mise). On macOS it checks for the Xcode command line tools.
-2. **Tools, per user, no sudo.** It installs [mise](https://mise.jdx.dev) into `~/.local/bin`,
-   which installs everything in `mise/config.toml`: Neovim, lazygit, delta, ripgrep, fd, fzf,
-   tree-sitter, Node LTS (with npm) and pnpm, at the pinned versions. It also adds mise to
-   `~/.zshrc` or `~/.bashrc`.
-3. **Configs.** Symlinks them into place, moving anything already there to `<name>.bak.<time>`.
-4. **Font and terminal.** On macOS it installs JetBrains Mono NL Nerd Font, and Ghostty too if
-   Homebrew is present. On desktop Linux it installs the font into `~/.local/share/fonts`. Over
-   SSH it skips the font, because your local terminal draws the text. On WSL, install the font
-   on Windows.
-5. **Neovim.** Installs the plugins at the versions in `nvim/lazy-lock.json` and waits for Mason
-   to install the language servers and formatters.
+   missing and sudo works. On macOS it checks for the Xcode command line tools.
+2. **mise.** Downloads [mise](https://mise.jdx.dev) at a pinned version into `~/.local/bin` and
+   checks it against its published SHA-256.
+3. **Tools, per user, no sudo.** mise installs everything in `mise-global/config.toml`: Neovim,
+   lazygit, delta, ripgrep, fd, fzf, tree-sitter, Node, pnpm and gitleaks, plus Neovim's language
+   servers, formatters, linters and Rust debugger. `mise-global/mise.lock` records each
+   download's URL and checksum for every platform, and mise refuses anything that doesn't match.
+4. **Shell startup.** Adds a marked block to `~/.zshrc`/`~/.bashrc` (activates mise) and to
+   `~/.zprofile`/`~/.profile` (mise's shims, so GUI apps, cron and scripts find the tools too).
+5. **Configs.** Symlinks them into place. Anything already there is moved to
+   `~/.local/state/dotfiles/backups/<timestamp>/`.
+6. **Font and terminal.** On macOS: JetBrains Mono NL Nerd Font (checksum-verified), and Ghostty
+   if Homebrew is present. On desktop Linux the font goes in `~/.local/share/fonts`. Skipped over
+   SSH (your local terminal draws the text) and on WSL (install it on Windows).
+7. **Neovim.** Installs the plugins at the commits in `nvim/lazy-lock.json` and builds the
+   treesitter parsers.
 
-## Versions and updating
+## Secrets and machine-only settings
 
-Everything is pinned so every machine gets the same setup: the tools in `mise/config.toml`,
-the plugins in `nvim/lazy-lock.json`, and mise, zig, 7-Zip and the Nerd Font at the top of
-`install.sh`. To update:
+Nothing secret belongs in this repo (it's public). Put machine-only settings, such as proxy
+variables or tokens, in `~/.config/dotfiles/local.sh`: the shell startup blocks load it, and it
+never lives in the repo. Your git name and email stay in `~/.gitconfig` for the same reason.
 
-- **Tools:** `mise outdated` shows what's newer; `mise up --bump` installs it and rewrites
-  `mise/config.toml`.
-- **Plugins:** `:Lazy update` in Neovim rewrites `lazy-lock.json`.
+As a backstop, [gitleaks](https://github.com/gitleaks/gitleaks) checks every commit: a
+pre-commit hook (switched on by `install.sh`) refuses commits containing anything that looks
+like a key or token, and CI scans the whole history.
 
-Then commit and push from `~/dotfiles`, and run `install.sh` (or `mise install`) on the other
-machines.
+## Changing things
+
+Configs are symlinks into `~/dotfiles`, so edits land in the repo; commit and push them. Then:
+
+- **Tool versions:** change `mise-global/config.toml` (or `mise upgrade --bump`), then run
+  `scripts/lock.sh` and commit the lockfiles with it.
+- **Plugins:** after `:Lazy update` or adding a plugin, commit `nvim/lazy-lock.json`.
+- **A new config file:** move it into the repo and add a `link` line to `install.sh`.
+- **On other machines:** `git pull`, then `install.sh` (or just `mise install`).
+
+You rarely need to bump things by hand: every Monday the **Update pins** workflow bumps every
+version to the newest release that's at least a week old (Node to the newest LTS), refreshes the
+lockfiles and plugins, and opens a pull request. CI installs that branch on fresh Linux and
+macOS, and you merge it if it's green.
+
+## Testing
+
+- `scripts/test-linux.sh` / `scripts/test-linux.sh --no-sudo`: install on a fresh Ubuntu box in
+  Docker, verify, re-run, and check the repo wasn't modified.
+- `scripts/verify.sh`: check an installed machine (tools, theme, parsers, language servers
+  attaching, formatters, debugger).
+- CI runs shellcheck, a gitleaks scan, and both Linux variants plus macOS on every push to `main`, every pull
+  request and weekly.
 
 ## What's here
 
-| Path | Linked to |
+| Path | What it is |
 |---|---|
-| `nvim/` | `~/.config/nvim` |
-| `lazygit/config.yml` | lazygit's config dir (`lazygit --print-config-dir`) |
-| `mise/config.toml` | `~/.config/mise/config.toml` |
+| `nvim/` | Neovim config, linked to `~/.config/nvim` |
+| `mise-global/` | tool versions and lockfile, linked to `~/.config/mise` |
+| `mise-fallback/` | zig and 7-Zip, only for boxes without a compiler or unzip and no sudo |
+| `lazygit/config.yml` | linked into lazygit's config dir |
 | `git/delta.gitconfig` | included from `~/.gitconfig` (name and email stay per machine) |
+| `scripts/` | pins, lockfile, test and verify scripts |
+| `CLAUDE.md` | how it works and the rules for changing it, for AI agents and future you |
 
 ## Notable tweaks
 
@@ -67,3 +99,5 @@ machines.
   `yss` for the line.
 - **Buffers:** `Q` closes the current buffer.
 - **Diffs:** delta in git and lazygit; lazygit opens side by side, `|` switches to unified.
+- **Language tools:** from mise instead of Mason, so they're pinned and locked like everything
+  else.

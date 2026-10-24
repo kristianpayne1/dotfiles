@@ -1,0 +1,34 @@
+# Tools for this setup, installed per user by mise (no sudo). This folder is ~/.config/mise.
+# Everything is pinned and locked: mise.lock (and locks/ for npm packages) records each
+# download's URL and checksum for every platform, and installs refuse anything not in it.
+# To update: `mise up --bump`, then `mise lock` (see README); the weekly workflow does both.
+[settings]
+locked = true
+# asdf and vfox plugins run arbitrary scripts; stick to backends that verify downloads
+disable_backends = ["asdf", "vfox"]
+
+[tools]
+# editor and terminal tools
+"aqua:neovim/neovim" = "0.12.6"
+lazygit = "0.66.2"
+delta = "0.20.1"
+ripgrep = "15.2.0"
+fd = "10.5.0"
+fzf = "0.74.5"
+tree-sitter = "0.27.1"
+node = "24.22.1"
+pnpm = "12.15.0"
+gitleaks = "8.30.1"
+
+# language servers, formatters and linters for Neovim (instead of Mason)
+lua-language-server = "3.19.2"
+marksman = "2026-02-08"
+shfmt = "3.14.1"
+stylua = "2.6.0"
+"github:vadimcn/codelldb" = "1.12.3"
+"npm:prettier" = "3.9.10"
+"npm:markdownlint-cli2" = "0.24.0"
+"npm:markdown-toc" = "1.2.0"
+"npm:@vtsls/language-server" = "0.3.0"
+"npm:yaml-language-server" = "2.0.0"
+"npm:vscode-langservers-extracted" = "4.10.0"

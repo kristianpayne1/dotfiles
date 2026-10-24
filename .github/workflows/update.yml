@@ -1,0 +1,69 @@
+# Weekly: bump every pinned version to the newest release at least a week old (Node to the newest
+# LTS), refresh the lockfiles and Neovim plugins, and open a pull request that CI then tests.
+name: Update pins
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  GH_TOKEN: ${{ github.token }}
+  MIN_AGE: 7d
+  BRANCH: update/pins
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install the current setup
+        run: ./install.sh
+
+      - name: Bump versions and refresh lockfiles
+        run: |
+          export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+          export MISE_LOCKED=false
+          mise upgrade --global --bump --minimum-release-age "$MIN_AGE" --exclude node
+          MISE_PIN=true mise upgrade --global --bump --minimum-release-age "$MIN_AGE" node@lts
+          mise trust --quiet mise-fallback/mise.toml
+          mise upgrade --cd mise-fallback --bump --minimum-release-age "$MIN_AGE"
+          scripts/lock.sh
+          MIN_AGE_DAYS="${MIN_AGE%d}" scripts/update-pins.sh
+          nvim --headless "+Lazy! update" "+qa!"
+
+      - name: Open or update the pull request
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "everything is up to date"; exit 0
+          fi
+          changes="$(git diff -U0 mise-global/config.toml mise-fallback/mise.toml scripts/pins.sh |
+            grep -E '^[-+][^-+#]' | sed 's/^/    /')"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add -A
+          git commit -q -m "Update pinned versions"
+          git push --force origin "$BRANCH"
+          body="Weekly update: newest releases at least $MIN_AGE old, lockfiles refreshed, Neovim plugins updated.
+
+          Version changes:
+
+          $changes
+
+          CI runs the full install on Linux and macOS against this branch."
+          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+            gh pr create --head "$BRANCH" --title "Update pinned versions" --body "$body"
+          else
+            gh pr edit "$BRANCH" --body "$body"
+          fi
+          # pushes made with the workflow token don't trigger other workflows; start CI directly
+          gh workflow run ci.yml --ref "$BRANCH"
