@@ -1,0 +1,69 @@
+# Install on fresh Linux (with and without sudo) and macOS, then check the result with verify.sh.
+# Weekly too, to catch a pinned download that moved or broke upstream.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: shellcheck install.sh scripts/*.sh scripts/hooks/pre-commit
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: gitleaks (whole history)
+        run: >
+          docker run --rm -v "$PWD:/repo"
+          zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+          git /repo --redact --no-banner
+
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [sudo, --no-sudo]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: scripts/test-linux.sh ${{ matrix.mode }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install
+        run: ./install.sh
+      - name: Verify in a new login shell
+        run: bash -lic ./scripts/verify.sh
+      - name: Re-run changes nothing and the repo stays untouched
+        run: |
+          if ./install.sh 2>&1 | grep -E 'linked|moved|updated .* block|added'; then
+            echo "re-run changed something"; exit 1
+          fi
+          git status --porcelain
+          test -z "$(git status --porcelain)"
