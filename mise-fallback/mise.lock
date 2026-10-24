@@ -3,29 +3,29 @@
 lockfile_version = 3
 
 [[tools.7zip]]
-version = "26.05"
+version = "26.04"
 backend = "aqua:ip7z/7zip"
-specifiers = ["26.05"]
+specifiers = ["26.04"]
 
 [tools.7zip."platforms.linux-arm64"]
-checksum = "sha256:0b71f6cfc34669b3bf69f2347efd3429f77020665003a13b9cdc53b784270421"
-url = "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-linux-arm64.tar.xz"
-url_api = "https://api.github.com/repos/ip7z/7zip/releases/assets/662536671"
+checksum = "sha256:5b0ac3aa91c1e3499f011d6af69d7f6b4de3ef2f011d9e2ff44c58ebd04aa388"
+url = "https://github.com/ip7z/7zip/releases/download/26.04/7z2604-linux-arm64.tar.xz"
+url_api = "https://api.github.com/repos/ip7z/7zip/releases/assets/614879034"
 
 [tools.7zip."platforms.linux-x64"]
-checksum = "sha256:22cf82fcc6eb7474f1d5bb4f02c0f8ebd573a718089d6833dc30f8350a3b232e"
-url = "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-linux-x64.tar.xz"
-url_api = "https://api.github.com/repos/ip7z/7zip/releases/assets/662536708"
+checksum = "sha256:fc0327ba27e89bd086cf426dff17d77de582953cdbbc10a6576540a06853ffcd"
+url = "https://github.com/ip7z/7zip/releases/download/26.04/7z2604-linux-x64.tar.xz"
+url_api = "https://api.github.com/repos/ip7z/7zip/releases/assets/614879045"
 
 [tools.7zip."platforms.macos-arm64"]
-checksum = "sha256:12ef6830317743cfd3f0ab1724bde43fcc270d8b6d8564f8c12c2a2b7f993570"
-url = "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-mac.tar.xz"
-url_api = "https://api.github.com/repos/ip7z/7zip/releases/assets/662536759"
+checksum = "sha256:bee04358cbcbc7106273cee0e8d72916db2696c48067a3538c34d8cd6fd16578"
+url = "https://github.com/ip7z/7zip/releases/download/26.04/7z2604-mac.tar.xz"
+url_api = "https://api.github.com/repos/ip7z/7zip/releases/assets/614879085"
 
 [tools.7zip."platforms.macos-x64"]
-checksum = "sha256:12ef6830317743cfd3f0ab1724bde43fcc270d8b6d8564f8c12c2a2b7f993570"
-url = "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-mac.tar.xz"
-url_api = "https://api.github.com/repos/ip7z/7zip/releases/assets/662536759"
+checksum = "sha256:bee04358cbcbc7106273cee0e8d72916db2696c48067a3538c34d8cd6fd16578"
+url = "https://github.com/ip7z/7zip/releases/download/26.04/7z2604-mac.tar.xz"
+url_api = "https://api.github.com/repos/ip7z/7zip/releases/assets/614879085"
 
 [[tools.zig]]
 version = "0.17.0"
@@ -39,6 +39,7 @@ url = "https://ziglang.org/download/0.17.0/zig-aarch64-linux-0.17.0.tar.xz"
 [tools.zig."platforms.linux-x64"]
 checksum = "sha256:1cbe9df9f27e6b78d14ccbca43b6703a404ef79ef1c463de901d7f088d4e2026"
 url = "https://ziglang.org/download/0.17.0/zig-x86_64-linux-0.17.0.tar.xz"
+provenance = "minisign"
 
 [tools.zig."platforms.macos-arm64"]
 checksum = "sha256:b607e9b9234790a008116ae5bdb71c6243b84b9fb42a53a9e70fde41c06c536a"
