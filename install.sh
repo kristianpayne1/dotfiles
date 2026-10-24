@@ -73,14 +73,19 @@ link() {
   info "linked $dest -> $src"
 }
 
-# write_block FILE NAME CONTENT: put CONTENT between "# >>> NAME >>>" markers in FILE,
-# replacing the previous block so re-runs and changes to this script stay tidy
+# write_block FILE NAME CONTENT: put CONTENT between "# >>> NAME >>>" markers in FILE, replacing
+# the previous block in place (or appending the first time) so re-runs and changes stay tidy
 write_block() {
-  local file="$1" begin="# >>> $2 >>>" end="# <<< $2 <<<" content="$3" tmp
+  local file="$1" tmp
   touch "$file"
   tmp="$(mktemp)"
-  awk -v b="$begin" -v e="$end" '$0 == b { skip = 1 } !skip { print } $0 == e { skip = 0 }' "$file" >"$tmp"
-  printf '%s\n%s\n%s\n' "$begin" "$content" "$end" >>"$tmp"
+  BEGIN_MARK="# >>> $2 >>>" END_MARK="# <<< $2 <<<" BLOCK="$3" awk '
+    function block() { print ENVIRON["BEGIN_MARK"]; print ENVIRON["BLOCK"]; print ENVIRON["END_MARK"] }
+    $0 == ENVIRON["BEGIN_MARK"] { block(); skip = 1; done = 1; next }
+    skip { if ($0 == ENVIRON["END_MARK"]) skip = 0; next }
+    { print }
+    END { if (!done) block() }
+  ' "$file" >"$tmp"
   if ! cmp -s "$tmp" "$file"; then
     cat "$tmp" >"$file"
     info "updated $2 block in $file"
