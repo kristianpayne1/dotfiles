@@ -26,20 +26,24 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install the current setup
-        run: ./install.sh
+        run: ./install.sh --full --use-mise-runtimes
 
       - name: Bump versions and refresh lockfiles
         run: |
           export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
-          export MISE_LOCKED=false
+          export MISE_LOCKED=false MISE_ENV=full
           cp mise-global/config.toml "$RUNNER_TEMP/global.toml"
+          cp mise-global/config.full.toml "$RUNNER_TEMP/global-full.toml"
           cp mise-fallback/mise.toml "$RUNNER_TEMP/fallback.toml"
-          mise upgrade --global --bump --minimum-release-age "$MIN_AGE" --exclude node
-          MISE_PIN=true mise upgrade --global --bump --minimum-release-age "$MIN_AGE" node@lts
+          # Node follows LTS and Python stays on its minor line; everything else takes the newest
+          python_minor="$(sed -n 's/^python = "\([0-9]*\.[0-9]*\).*/\1/p' mise-global/config.full.toml)"
+          mise upgrade --global --bump --minimum-release-age "$MIN_AGE" --exclude node --exclude python
+          MISE_PIN=true mise upgrade --global --bump --minimum-release-age "$MIN_AGE" node@lts "python@$python_minor"
           mise trust --quiet mise-fallback/mise.toml
           mise upgrade --cd mise-fallback --bump --minimum-release-age "$MIN_AGE"
           # the age limit can pick a release older than one already pinned; keep the newer one
           scripts/keep-newer.sh "$RUNNER_TEMP/global.toml" mise-global/config.toml
+          scripts/keep-newer.sh "$RUNNER_TEMP/global-full.toml" mise-global/config.full.toml
           scripts/keep-newer.sh "$RUNNER_TEMP/fallback.toml" mise-fallback/mise.toml
           scripts/lock.sh
           MIN_AGE_DAYS="${MIN_AGE%d}" scripts/update-pins.sh
@@ -50,7 +54,7 @@ jobs:
           if [ -z "$(git status --porcelain)" ]; then
             echo "everything is up to date"; exit 0
           fi
-          changes="$(git diff -U0 mise-global/config.toml mise-fallback/mise.toml scripts/pins.sh |
+          changes="$(git diff -U0 mise-global/config.toml mise-global/config.full.toml mise-fallback/mise.toml scripts/pins.sh |
             grep -E '^[-+][^-+#]' | sed 's/^/    /')"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
