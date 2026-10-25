@@ -58,6 +58,10 @@ covered by CI. Don't test on the user's machine: `~/.config/nvim` is a live syml
   folder is `mise-global/`, not `mise/`.
 - `scripts/lock.sh` locks through a temporary `XDG_CONFIG_HOME` so the lock is written the way a
   real machine reads it (global config).
+- A fresh `Lazy! restore` doesn't fully honour `lazy-lock.json`: plugins that only appear after
+  LazyVim itself is installed are cloned at their latest commit and written back over the pin.
+  It only shows once those plugins get new upstream commits, so CI can pass one day and fail the
+  next. `install.sh` saves the lockfile, installs, puts it back and restores again.
 - mason-lspconfig skips `ensure_installed` when headless; one reason Mason was dropped.
 - zig can't parse the Rust-style `-target aarch64-unknown-linux-gnu` that tree-sitter passes;
   the `cc` wrapper drops it.
