@@ -32,10 +32,15 @@ jobs:
         run: |
           export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
           export MISE_LOCKED=false
+          cp mise-global/config.toml "$RUNNER_TEMP/global.toml"
+          cp mise-fallback/mise.toml "$RUNNER_TEMP/fallback.toml"
           mise upgrade --global --bump --minimum-release-age "$MIN_AGE" --exclude node
           MISE_PIN=true mise upgrade --global --bump --minimum-release-age "$MIN_AGE" node@lts
           mise trust --quiet mise-fallback/mise.toml
           mise upgrade --cd mise-fallback --bump --minimum-release-age "$MIN_AGE"
+          # the age limit can pick a release older than one already pinned; keep the newer one
+          scripts/keep-newer.sh "$RUNNER_TEMP/global.toml" mise-global/config.toml
+          scripts/keep-newer.sh "$RUNNER_TEMP/fallback.toml" mise-fallback/mise.toml
           scripts/lock.sh
           MIN_AGE_DAYS="${MIN_AGE%d}" scripts/update-pins.sh
           nvim --headless "+Lazy! update" "+qa!"
