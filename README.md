@@ -7,8 +7,7 @@ pinned to an exact version and checked against a recorded checksum.
 ## Install
 
 ```sh
-git clone https://github.com/kristianpayne1/dotfiles.git ~/dotfiles
-~/dotfiles/install.sh            # asks which profile; or pass --editor / --full
+git clone https://github.com/kristianpayne1/dotfiles.git ~/dotfiles | sh ~/dotfiles/install.sh            # asks which profile; or pass --editor / --full
 ```
 
 Then open a new terminal. Re-running the script is safe and remembers the profile.
