@@ -29,11 +29,10 @@ gui:
       - "#e06c75"
     defaultFgColor:
       - "#abb2bf"
-
 git:
   # `|` cycles between these: side-by-side first, unified second
-  pagers:
+  diffRenderers:
     - colorArg: always
-      pager: delta --dark --paging=never --side-by-side --width=$(( ({{columnWidth}} + 6) * 2 ))
+      command: delta --dark --paging=never --side-by-side --width=$(( ({{columnWidth}} + 6) * 2 ))
     - colorArg: always
-      pager: delta --dark --paging=never
+      command: delta --dark --paging=never
