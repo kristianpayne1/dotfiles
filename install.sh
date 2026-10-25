@@ -317,10 +317,20 @@ fi
 
 # 8. Neovim plugins (and treesitter parsers) at the versions in lazy-lock.json -----------------
 info "installing Neovim plugins and treesitter parsers"
-# restore runs twice: the second pass retries fetches that failed (proxies and GitHub sometimes
-# reject a burst of parallel git requests) and is nearly free otherwise. nvim-setup.lua then waits
-# for the treesitter parsers, which build in the background.
-nvim --headless "+Lazy! restore" "+Lazy! restore" "+luafile $DOTFILES/scripts/nvim-setup.lua" "+qa!" || note "Neovim setup reported errors; open nvim to finish"
+# Two passes. A fresh install can't fully honour the lockfile: plugins that only appear once LazyVim
+# itself is installed get cloned at their latest commit, and lazy writes that back over the pin.
+# So: install everything, put the committed lockfile back, and restore again, which now checks out
+# exactly the pinned commits (and retries any fetch that failed, e.g. behind a proxy).
+# Each pass runs nvim-setup.lua, which builds the treesitter parsers and waits for them; quitting
+# mid-build can leave a language half-installed.
+lock="$DOTFILES/nvim/lazy-lock.json"
+saved_lock="$(mktemp)"
+cp "$lock" "$saved_lock"
+nvim --headless "+Lazy! restore" "+luafile $DOTFILES/scripts/nvim-setup.lua" "+qa!" || true
+cp "$saved_lock" "$lock"
+rm -f "$saved_lock"
+nvim --headless "+Lazy! restore" "+luafile $DOTFILES/scripts/nvim-setup.lua" "+qa!" ||
+  note "Neovim setup reported errors; open nvim to finish"
 
 info "done; open a new terminal (or run: exec \$SHELL -l)"
 for n in "${NOTES[@]+"${NOTES[@]}"}"; do echo "note: $n"; done
