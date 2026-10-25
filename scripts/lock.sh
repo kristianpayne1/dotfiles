@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Rewrite mise-global/mise.lock and mise-fallback/mise.lock for every platform these dotfiles support.
-# Run after changing a version in mise-global/config.toml or mise-fallback/mise.toml.
+# Rewrite the lockfiles (mise-global/mise.lock, mise-global/mise.full.lock, mise-fallback/mise.lock)
+# for every platform these dotfiles support.
+# Run after changing a version in mise-global/config*.toml or mise-fallback/mise.toml.
 set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -12,7 +13,8 @@ PLATFORMS="linux-x64,linux-arm64,macos-x64,macos-arm64"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 ln -s "$DOTFILES/mise-global" "$tmp/mise"
-XDG_CONFIG_HOME="$tmp" mise lock --global --platform "$PLATFORMS"
+# MISE_ENV=full includes config.full.toml, so this writes both mise.lock and mise.full.lock
+XDG_CONFIG_HOME="$tmp" MISE_ENV=full mise lock --global --platform "$PLATFORMS"
 
 mise trust --quiet "$DOTFILES/mise-fallback/mise.toml"
 mise lock --cd "$DOTFILES/mise-fallback" --platform "$PLATFORMS"

@@ -1,7 +1,9 @@
 # Tools for this setup, installed per user by mise (no sudo). This folder is ~/.config/mise.
-# Everything is pinned and locked: mise.lock (and locks/ for npm packages) records each
-# download's URL and checksum for every platform, and installs refuse anything not in it.
-# To update: `mise up --bump`, then `mise lock` (see README); the weekly workflow does both.
+# This file is the editor profile, installed everywhere. config.full.toml adds the language
+# runtimes for `install.sh --full` (read when MISE_ENV=full).
+# Everything is pinned and locked: mise.lock / mise.full.lock (and .mise/locks/ for npm packages)
+# record each download's URL and checksum for every platform, and installs refuse anything else.
+# To update: change a version and run scripts/lock.sh (see README); the weekly workflow does both.
 [settings]
 locked = true
 # asdf and vfox plugins run arbitrary scripts; stick to backends that verify downloads
@@ -16,13 +18,18 @@ ripgrep = "15.2.0"
 fd = "10.5.0"
 fzf = "0.74.5"
 tree-sitter = "0.27.1"
-node = "24.22.1"
-pnpm = "12.15.0"
 gitleaks = "8.30.1"
+
+# Node for the npm-based language servers below. install.sh only puts `node` itself on your PATH
+# with --full when you let mise own it; otherwise it stays private to these tools.
+node = "24.22.1"
 
 # language servers, formatters and linters for Neovim (instead of Mason)
 lua-language-server = "3.19.2"
 marksman = "2026-02-08"
+rust-analyzer = "2026-10-19"
+ruff = "0.17.2"
+taplo = "0.10.0"
 shfmt = "3.14.1"
 stylua = "2.6.0"
 "github:vadimcn/codelldb" = "1.12.3"
@@ -32,3 +39,5 @@ stylua = "2.6.0"
 "npm:@vtsls/language-server" = "0.3.0"
 "npm:yaml-language-server" = "2.0.0"
 "npm:vscode-langservers-extracted" = "4.10.0"
+"npm:basedpyright" = "1.40.2"
+"npm:@tailwindcss/language-server" = "0.16.0"

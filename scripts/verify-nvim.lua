@@ -36,8 +36,19 @@ local function check()
   end
 
   -- each file should get its language server from mise
-  local servers = { ["test.lua"] = "lua_ls", ["test.md"] = "marksman", ["test.ts"] = "vtsls", ["test.yaml"] = "yamlls" }
-  for file, server in pairs(servers) do
+  local servers = {
+    { "test.lua", "lua_ls" },
+    { "test.md", "marksman" },
+    { "test.ts", "vtsls" },
+    { "test.yaml", "yamlls" },
+    { "test.json", "jsonls" },
+    { "test.toml", "taplo" },
+    { "test.py", "basedpyright" },
+    { "test.py", "ruff" },
+    { "tailwind/index.html", "tailwindcss" },
+  }
+  for _, pair in ipairs(servers) do
+    local file, server = pair[1], pair[2]
     vim.cmd.edit(dir .. "/" .. file)
     local buf = vim.api.nvim_get_current_buf()
     local attached = vim.wait(60000, function()
