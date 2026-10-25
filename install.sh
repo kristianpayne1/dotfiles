@@ -321,11 +321,12 @@ info "installing Neovim plugins and treesitter parsers"
 # itself is installed get cloned at their latest commit, and lazy writes that back over the pin.
 # So: install everything, put the committed lockfile back, and restore again, which now checks out
 # exactly the pinned commits (and retries any fetch that failed, e.g. behind a proxy).
-# nvim-setup.lua then waits for the treesitter parsers, which build in the background.
+# Each pass runs nvim-setup.lua, which builds the treesitter parsers and waits for them; quitting
+# mid-build can leave a language half-installed.
 lock="$DOTFILES/nvim/lazy-lock.json"
 saved_lock="$(mktemp)"
 cp "$lock" "$saved_lock"
-nvim --headless "+Lazy! restore" "+qa!" || true
+nvim --headless "+Lazy! restore" "+luafile $DOTFILES/scripts/nvim-setup.lua" "+qa!" || true
 cp "$saved_lock" "$lock"
 rm -f "$saved_lock"
 nvim --headless "+Lazy! restore" "+luafile $DOTFILES/scripts/nvim-setup.lua" "+qa!" ||
