@@ -3,6 +3,6 @@
 # silently replaces a work-managed Node, Python or Rust. Node itself is in config.toml.
 [tools]
 pnpm = "12.15.0"
-python = "3.14.9"
+python = "3.15.0"
 uv = "0.13.5"
 rust = "1.99.1"

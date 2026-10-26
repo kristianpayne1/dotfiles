@@ -22,7 +22,7 @@ gitleaks = "8.30.1"
 
 # Node for the npm-based language servers below. install.sh only puts `node` itself on your PATH
 # with --full when you let mise own it; otherwise it stays private to these tools.
-node = "24.22.1"
+node = "26.12.0"
 
 # language servers, formatters and linters for Neovim (instead of Mason)
 lua-language-server = "3.19.2"
