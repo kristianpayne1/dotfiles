@@ -1,5 +1,5 @@
-# Weekly: bump every pinned version to the newest release at least a week old (Node to the newest
-# LTS), refresh the lockfiles and Neovim plugins, and open a pull request that CI then tests.
+# Weekly: bump every pinned version to the newest release at least two weeks old (Node to the
+# newest LTS), refresh the lockfiles and Neovim plugins, and open a pull request that CI then tests.
 name: Update pins
 
 on:
@@ -15,7 +15,7 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ github.token }}
   GH_TOKEN: ${{ github.token }}
-  MIN_AGE: 7d
+  MIN_AGE: 14d
   BRANCH: update/pins
 
 jobs:
@@ -40,7 +40,11 @@ jobs:
           mise upgrade --global --bump --minimum-release-age "$MIN_AGE" --exclude node --exclude python
           MISE_PIN=true mise upgrade --global --bump --minimum-release-age "$MIN_AGE" node@lts "python@$python_minor"
           mise trust --quiet mise-fallback/mise.toml
-          mise upgrade --cd mise-fallback --bump --minimum-release-age "$MIN_AGE"
+          # name the fallback's own tools: the global config applies there too, and a bare upgrade
+          # would take Node and Python past the LTS and minor-line limits above
+          fallback_tools="$(sed -n '/^\[tools\]/,/^\[/s/^\([A-Za-z0-9_:-]*\) *=.*/\1/p' mise-fallback/mise.toml)"
+          # shellcheck disable=SC2086
+          mise upgrade --cd mise-fallback --bump --minimum-release-age "$MIN_AGE" $fallback_tools
           # the age limit can pick a release older than one already pinned; keep the newer one
           scripts/keep-newer.sh "$RUNNER_TEMP/global.toml" mise-global/config.toml
           scripts/keep-newer.sh "$RUNNER_TEMP/global-full.toml" mise-global/config.full.toml
@@ -69,10 +73,12 @@ jobs:
           $changes
 
           CI runs the full install on Linux and macOS against this branch."
-          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+          # gh pr view also finds closed PRs; only reuse one that's still open
+          pr="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [ -z "$pr" ]; then
             gh pr create --head "$BRANCH" --title "Update pinned versions" --body "$body"
           else
-            gh pr edit "$BRANCH" --body "$body"
+            gh pr edit "$pr" --body "$body"
           fi
           # pushes made with the workflow token don't trigger other workflows; start CI directly
           gh workflow run ci.yml --ref "$BRANCH"

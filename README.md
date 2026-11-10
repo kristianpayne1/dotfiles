@@ -84,7 +84,7 @@ Configs are symlinks into `~/dotfiles`, so edits land in the repo; commit and pu
 - **On other machines:** `git pull`, then `install.sh` (or just `mise install`).
 
 You rarely need to bump things by hand: every Monday the **Update pins** workflow bumps every
-version to the newest release that's at least a week old (Node to the newest LTS), refreshes the
+version to the newest release that's at least two weeks old (Node to the newest LTS), refreshes the
 lockfiles and plugins, and opens a pull request. CI installs that branch on fresh Linux and
 macOS, and you merge it if it's green.
 

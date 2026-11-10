@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Regenerate scripts/pins.sh: the mise and Nerd Fonts releases install.sh downloads before mise
 # takes over, with their published SHA-256 checksums.
-#   scripts/update-pins.sh                  newest releases at least $MIN_AGE_DAYS old (default 7)
+#   scripts/update-pins.sh                  newest releases at least $MIN_AGE_DAYS old (default 14)
 #   scripts/update-pins.sh v2026.10.17 v3.5.1   specific versions
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
-MIN_AGE_DAYS="${MIN_AGE_DAYS:-7}"
+MIN_AGE_DAYS="${MIN_AGE_DAYS:-14}"
 
 api() {
   local auth=()

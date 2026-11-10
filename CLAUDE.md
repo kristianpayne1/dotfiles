@@ -86,8 +86,8 @@ covered by CI. Don't test on the user's machine: `~/.config/nvim` is a live syml
   via `sh -c`.
 - `mise upgrade --bump` keeps version precision but takes Node to the newest release overall;
   `update.yml` bumps Node separately via `node@lts` with `MISE_PIN=true`.
-- The 7-day minimum release age can pick a release *older* than one already pinned (a pin newer
-  than a week); `scripts/keep-newer.sh` and a check in `update-pins.sh` stop updates going
+- The 14-day minimum release age can pick a release *older* than one already pinned (a pin newer
+  than two weeks); `scripts/keep-newer.sh` and a check in `update-pins.sh` stop updates going
   backwards.
 - Pushes made with the workflow token don't trigger workflows, so `update.yml` starts CI with
   `gh workflow run`.
