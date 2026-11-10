@@ -1,0 +1,6 @@
+# Base markdownlint config for nvim-lint (passed via --config in
+# lua/plugins/markdownlint.lua). A project's own .markdownlint* file still
+# applies on top of this.
+config:
+  # Line length: most Markdown in the wild wraps long lines, or doesn't wrap at all.
+  MD013: false
