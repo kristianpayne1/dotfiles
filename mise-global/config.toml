@@ -27,7 +27,7 @@ node = "24.22.2"
 # language servers, formatters and linters for Neovim (instead of Mason)
 lua-language-server = "3.19.2"
 marksman = "2026-02-08"
-rust-analyzer = "2026-10-26"
+rust-analyzer = "2026-11-02"
 ruff = "0.17.3"
 taplo = "0.10.0"
 shfmt = "3.14.1"
