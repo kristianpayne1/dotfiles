@@ -3,8 +3,10 @@
 -- in turn lose its borders, padding and formatting and the columns jump about. Raw Markdown still
 -- shows in insert mode (rendering is off there), and <leader>um toggles rendering.
 --
--- One case this can't fix: a row too wide for the window, which the plugin wraps into several
--- screen lines, always shows raw on the cursor line (render-markdown hard-codes it).
+-- This only helps tables that fit the window. A wider table has its columns shrunk and its rows
+-- redrawn as wrapped virtual lines, and render-markdown always shows such a row raw on the cursor
+-- line. Turning off pipe_table.wrap would stop that, but long rows would then soft-wrap into an
+-- unreadable mess, so wide tables keep the flip.
 return {
   "MeanderingProgrammer/render-markdown.nvim",
   opts = {
