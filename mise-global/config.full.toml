@@ -2,7 +2,7 @@
 # skips any of these that already exist on the machine unless you choose mise's, so it never
 # silently replaces a work-managed Node, Python or Rust. Node itself is in config.toml.
 [tools]
-pnpm = "12.16.0"
+pnpm = "12.18.0"
 python = "3.14.10"
-uv = "0.13.6"
+uv = "0.13.7"
 rust = "1.99.1"

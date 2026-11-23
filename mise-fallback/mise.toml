@@ -5,5 +5,5 @@ locked = true
 disable_backends = ["asdf", "vfox"]
 
 [tools]
-zig = "0.17.0"
-7zip = "26.05"
+zig = "0.17.1"
+7zip = "26.06"
