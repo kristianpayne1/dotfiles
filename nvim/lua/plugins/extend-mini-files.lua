@@ -45,7 +45,9 @@ return {
             not last
             or last.win_id ~= win_id
             or win_id == vim.api.nvim_get_current_win()
-            or vim.fn.isdirectory(last.path) == 1
+            -- not vim.fn.isdirectory: unsaved new entries have a path ending in NUL,
+            -- which Vimscript receives as a Blob (E976)
+            or (vim.uv.fs_stat(last.path or "") or {}).type == "directory"
           then
             return
           end
